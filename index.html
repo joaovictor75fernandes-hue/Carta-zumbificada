@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diário de Sobrevivência - Registro de Campo</title>
+    <style>
+        :root {
+            --bg-color: #0f0d0b;
+            --card-bg: #181512;
+            --border-color: #3a322b;
+            --text-main: #d4c5b9;
+            --accent-blood: #8b0000;
+            --accent-green: #4a6b47;
+            --font-paper: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-paper);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sheet-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-blood);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .photo-upload {
+            width: 140px;
+            height: 140px;
+            border: 2px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .info-inputs {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input, select, textarea {
+            background: #090807;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px;
+            font-family: var(--font-paper);
+            border-radius: 3px;
+        }
+
+        .status-bars {
+            display: grid;
+            grid-template-columns: 1px 1px;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .dice-section {
+            background: #12100e;
+            padding: 15px;
+            border: 1px dashed var(--accent-blood);
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .btn {
+            background: var(--accent-blood);
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: var(--font-paper);
+            font-weight: bold;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #a00000;
+        }
+
+        .skill-list, .inventory-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .inv-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #090807;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .ability-card {
+            background: #090807;
+            border-left: 3px solid var(--accent-green);
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        #dice-result {
+            font-size: 24px;
+            color: var(--accent-green);
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sheet-container">
+    <h1 style="text-align: center;">REGISTRO DE SOBREVIVENTE</h1>
+    
+    <!-- FOTO E INFOS BÁSICAS -->
+    <div class="header-section">
+        <div class="photo-upload" id="photoDisplay" onclick="document.getElementById('photoInput').click();">
+            <span>Clique para carregar foto</span>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="loadPhoto(event)">
+
+        <div class="info-inputs">
+            <input type="text" placeholder="Nome do Sobrevivente">
+            <input type="text" placeholder="Ocupação / Origem">
+        </div>
+    </div>
+
+    <!-- VIDA E SANIDADE -->
+    <h2>Status de Conflito</h2>
+    <div style="display: flex; gap: 10px;">
+        <div class="stat-box" style="flex: 1;">
+            <label style="color: var(--accent-blood);">VIDA (Ataques R físicos)</label>
+            <input type="number" value="20" placeholder="Atual / Máxima">
+        </div>
+        <div class="stat-box" style="flex: 1;">
+            <label style="color: #5b7290;">SANIDADE (Eventos Brutas)</label>
+            <input type="number" value="20" placeholder="Atual / Máxima">
+        </div>
+    </div>
+
+    <!-- ROLADOR DE DADOS -->
+    <div class="dice-section">
+        <h3>ROLADOR DE DADOS</h3>
+        <div style="display: flex; gap: 5px; justify-content: center;">
+            <input type="number" id="diceAmount" value="1" min="1" style="width: 50px; text-align: center;">
+            <span style="align-self: center;">d</span>
+            <select id="diceType">
+                <option value="20">20</option>
+                <option value="6">6</option>
+                <option value="10">10</option>
+                <option value="100">100</option>
+            </select>
+            <input type="number" id="diceBonus" value="0" placeholder="+ Bônus" style="width: 70px;">
+        </div>
+        <button class="btn" onclick="rollDice()">ROLAR DADOS</button>
+        <div id="dice-result">--</div>
+    </div>
+
+    <!-- HABILIDADES DE SOBREVIVÊNCIA (CRIADAS EXCLUSIVAS) -->
+    <h2>Habilidades Sobreviventes</h2>
+    <div class="ability-card">
+        <strong>1. Adrenalina de Fuga:</strong> Quando sua VIDA estiver abaixo de 25%, você ganha +2 d20 em testes de Agilidade/Furtividade para escapar de hordas.
+    </div>
+    <div class="ability-card">
+        <strong>2. Sangue-Frio:</strong> Você pode gastar 2 pontos de SANIDADE para ignorar o medo ao ver uma cena brutal e rolar o próximo teste de ataque com vantagem.
+    </div>
+    <div class="ability-card">
+        <strong>3. Improviso Brutal:</strong> Transforma qualquer objeto cotidiano (pé de cabra, garrafa) em uma arma com +2 de dano físico contra infectados por 1 cena.
+    </div>
+
+    <!-- PERÍCIAS (BASE ORDEM PARANORMAL) -->
+    <h2>Perícias Rápidas</h2>
+    <div class="info-inputs">
+        <select>
+            <option>Selecione uma perícia...</option>
+            <option>Luta</option>
+            <option>Pontaria</option>
+            <option>Furtividade</option>
+            <option>Percepção</option>
+            <option>Medicina</option>
+            <option>Sobrevivência</option>
+            <option>Investigação</option>
+            <option>Vontade</option>
+            <option>Atletismo</option>
+            <option>Tática</option>
+        </select>
+    </div>
+
+    <!-- INVENTÁRIO -->
+    <h2>Classe de Inventário & Carga</h2>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <input type="text" id="itemName" placeholder="Nome do Item/Arma" style="flex: 2;">
+        <input type="number" id="itemWeight" placeholder="Espaço" style="flex: 1;">
+        <button class="btn" style="width: auto; margin: 0;" onclick="addItem()">+ Adicionar</button>
+    </div>
+    <div class="inventory-list" id="inventoryList">
+        <!-- Itens aparecerão aqui -->
+    </div>
+
+    <!-- ANOTAÇÕES -->
+    <h2>Anotações do Diário</h2>
+    <textarea rows="5" style="width: 100%; box-sizing: border-box;" placeholder="Escreva sobre locais seguros, infectados vistos, sobreviventes encontrados..."></textarea>
+</div>
+
+<script>
+    // FOTO PROCESSADOR
+    function loadPhoto(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const output = document.getElementById('photoDisplay');
+            output.style.backgroundImage = `url('${reader.result}')`;
+            output.innerText = '';
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    // ROLADOR DE DADOS
+    function rollDice() {
+        const amount = parseInt(document.getElementById('diceAmount').value) || 1;
+        const type = parseInt(document.getElementById('diceType').value);
+        const bonus = parseInt(document.getElementById('diceBonus').value) || 0;
+        
+        let rolls = [];
+        let total = 0;
+
+        for (let i = 0; i < amount; i++) {
+            let roll = Math.floor(Math.random() * type) + 1;
+            rolls.push(roll);
+            total += roll;
+        }
+
+        total += bonus;
+
+        const resultDisplay = document.getElementById('dice-result');
+        resultDisplay.innerText = `${total} (Rolou: ${rolls.join(', ')} | Bônus: +${bonus})`;
+    }
+
+    // GERENCIADOR DE INVENTÁRIO
+    function addItem() {
+        const nameInput = document.getElementById('itemName');
+        const weightInput = document.getElementById('itemWeight');
+        
+        if (!nameInput.value) return;
+
+        const list = document.getElementById('inventoryList');
+        const newItem = document.createElement('div');
+        newItem.className = 'inv-item';
+        newItem.innerHTML = `
+            <span>${nameInput.value} (${weightInput.value || 1} Espaço)</span>
+            <button style="background:red; color:white; border:none; padding: 2px 6px; cursor:pointer;" onclick="this.parentElement.remove()">X</button>
+        `;
+        
+        list.appendChild(newItem);
+        nameInput.value = '';
+        weightInput.value = '';
+    }
+</script>
+
+</body>
+</html>
